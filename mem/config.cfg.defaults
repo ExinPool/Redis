@@ -1,0 +1,9 @@
+SERVICE=Redis
+MEM_NUM=80
+REDIS_CLI=""
+HOST=""
+SLEEP_NUM=60
+LOG_FILE=redis_mem_monitor.log
+WEBHOOK_URL=https://webhook.exinwork.com/api/send?access_token
+ACCESS_TOKEN=YOUR_ACCESS_TOKEN
+LARK_WEBHOOK_URL=https://open.larksuite.com/open-apis/bot/v2/hook/
