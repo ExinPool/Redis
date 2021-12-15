@@ -55,10 +55,10 @@ Add crontab like this in the server.
 
 ``` bash
 # Redis Mem monitor
-* * * * * cd /data/monitor/exinpool/Redis/mem && bash redis_mem_monitor.sh >> redis_mem_monitor.log &
+*/30 * * * * cd /data/monitor/exinpool/Redis/mem && bash redis_mem_monitor.sh >> redis_mem_monitor.log &
 
 # Redis Mem monitor
-* * * * * cd /data/monitor/exinpool/Redis/mem && bash redis_mem_monitor_lark.sh >> redis_mem_monitor.log &
+*/30 * * * * cd /data/monitor/exinpool/Redis/mem && bash redis_mem_monitor_lark.sh >> redis_mem_monitor.log &
 ```
 
 The crontab will run every minute then you can check the log in the `redis_mem_monitor.log`.
