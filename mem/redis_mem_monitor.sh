@@ -23,8 +23,10 @@ log_file="$(config_get LOG_FILE)"
 lark_webhook_url="$(config_get LARK_WEBHOOK_URL)"
 sleep_num="$(config_get SLEEP_NUM)"
 
-unit_m=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed 's/\r//g' | grep -e "M" && echo $?`
-unit_g=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed 's/\r//g' | grep -e "G" && echo $?`
+echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed 's/\r//g' | grep -e "M"
+unit_m=$?
+echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed 's/\r//g' | grep -e "G"
+unit_g=$?
 
 if [ ${unit_m} -eq 0 ]
 then
