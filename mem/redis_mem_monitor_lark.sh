@@ -23,29 +23,66 @@ log_file="$(config_get LOG_FILE)"
 lark_webhook_url="$(config_get LARK_WEBHOOK_URL)"
 sleep_num="$(config_get SLEEP_NUM)"
 
-mem_num_var_1=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
-sleep ${sleep_num}
-mem_num_var_2=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
-sleep ${sleep_num}
-mem_num_var_3=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
-sleep ${sleep_num}
-mem_num_var_4=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
-sleep ${sleep_num}
-mem_num_var_5=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
+unit_m=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed 's/\r//g' | grep -e "M" && echo $?`
+unit_g=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed 's/\r//g' | grep -e "G" && echo $?`
 
-sum=`echo "scale=2; ${mem_num_var_1} + ${mem_num_var_2} + ${mem_num_var_3} + ${mem_num_var_4} + ${mem_num_var_5}" | bc -l`
-avg=`echo $sum / 5 | bc -l`
-mem_num_var=`echo "scale = 2; $avg / ${mem_config} * 100" | bc -l`
-
-log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` INFO Mem usage: ${mem_num_var}."
-echo $log >> $log_file
-
-if (( $(echo "${mem_num_var} < ${mem_num}" | bc -l) ))
+if [ ${unit_m} -eq 0 ]
 then
-    log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} cpu num is normal."
+    mem_num_var_1=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/M//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_2=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/M//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_3=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/M//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_4=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/M//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_5=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/M//g" | sed 's/\r//g'`
+
+    sum=`echo "scale=2; ${mem_num_var_1} + ${mem_num_var_2} + ${mem_num_var_3} + ${mem_num_var_4} + ${mem_num_var_5}" | bc -l`
+    avg=`echo $sum / 5 | bc -l`
+    mem_config_var=`echo "scale = 2; ${mem_config} * 1024" | bc -l`
+    mem_num_var=`echo "scale = 2; $avg / ${mem_config_var} * 100" | bc -l`
+
+    log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` INFO Mem usage: ${mem_num_var}."
     echo $log >> $log_file
-else
-    log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：内存\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
+
+    if (( $(echo "${mem_num_var} < ${mem_num}" | bc -l) ))
+    then
+        log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} cpu num is normal."
+        echo $log >> $log_file
+    else
+        log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：内存\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
+        echo $log >> $log_file
+        curl -X POST -H "Content-Type: application/json" -d '{"msg_type":"text","content":{"text":"'"$log"'"}}' ${lark_webhook_url}
+    fi
+fi
+
+if [ ${unit_g} -eq 0 ]
+then
+    mem_num_var_1=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_2=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_3=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_4=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
+    sleep ${sleep_num}
+    mem_num_var_5=`echo "info memory" | redis-cli -h $host --tls -a "$passwd" -p $port | grep used_memory_human | awk -F':' '{print $2}' | sed "s/G//g" | sed 's/\r//g'`
+
+    sum=`echo "scale=2; ${mem_num_var_1} + ${mem_num_var_2} + ${mem_num_var_3} + ${mem_num_var_4} + ${mem_num_var_5}" | bc -l`
+    avg=`echo $sum / 5 | bc -l`
+    mem_num_var=`echo "scale = 2; $avg / ${mem_config} * 100" | bc -l`
+
+    log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` INFO Mem usage: ${mem_num_var}."
     echo $log >> $log_file
-    curl -X POST -H "Content-Type: application/json" -d '{"msg_type":"text","content":{"text":"'"$log"'"}}' ${lark_webhook_url}
+
+    if (( $(echo "${mem_num_var} < ${mem_num}" | bc -l) ))
+    then
+        log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} cpu num is normal."
+        echo $log >> $log_file
+    else
+        log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：内存\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
+        echo $log >> $log_file
+        curl -X POST -H "Content-Type: application/json" -d '{"msg_type":"text","content":{"text":"'"$log"'"}}' ${lark_webhook_url}
+    fi
 fi
