@@ -44,7 +44,7 @@ then
     log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} cpu num is normal."
     echo $log >> $log_file
 else
-    log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：MEM\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
+    log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：内存\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
     echo $log >> $log_file
     success=`curl ${webhook_url}=${access_token} -XPOST -H 'Content-Type: application/json' -d '{"category":"PLAIN_TEXT","data":"'"$log"'"}' | awk -F',' '{print $1}' | awk -F':' '{print $2}'`
     if [ "$success" = "true" ]
