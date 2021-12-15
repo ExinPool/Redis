@@ -1,7 +1,8 @@
 SERVICE=Redis
 MEM_NUM=80
-REDIS_CLI=""
 HOST=""
+PORT=""
+PASSWD=""
 SLEEP_NUM=60
 LOG_FILE=redis_mem_monitor.log
 WEBHOOK_URL=https://webhook.exinwork.com/api/send?access_token
