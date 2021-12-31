@@ -50,7 +50,7 @@ then
 
     if (( $(echo "${mem_num_var} < ${mem_num}" | bc -l) ))
     then
-        log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} cpu num is normal."
+        log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} mem num is normal."
         echo $log >> $log_file
     else
         log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：内存\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
@@ -80,7 +80,7 @@ then
 
     if (( $(echo "${mem_num_var} < ${mem_num}" | bc -l) ))
     then
-        log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} cpu num is normal."
+        log="`date '+%Y-%m-%d %H:%M:%S'` `hostname` `whoami` INFO ${service} mem num is normal."
         echo $log >> $log_file
     else
         log="时间：`date '+%Y-%m-%d %H:%M:%S'`\nHost: ${host}\n监控类型：内存\n状态：${service} 内存使用率已超过 ${mem_num}，请及时处理。"
